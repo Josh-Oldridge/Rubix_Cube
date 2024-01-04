@@ -36,6 +36,7 @@ include_directories(
 	external/glfw-3.1.2/include/GLFW/
 	external/glm-0.9.7.1/
 	external/glew-1.13.0/include/
+	common/
 	.
 )
 
@@ -55,12 +56,11 @@ add_definitions(
 
 # User playground
 add_executable(playground 
-	playground/playground.cpp
-	playground/playground.h
+	playground/main.cpp
+	playground/cube.cpp
 	playground/SimpleFragmentShader.fragmentshader
 	playground/SimpleVertexShader.vertexshader
 	common/shader.cpp
-	common/shader.hpp
 )
 target_link_libraries(playground
 	${ALL_LIBS}
