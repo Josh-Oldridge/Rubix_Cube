@@ -58,6 +58,8 @@ add_definitions(
 add_executable(playground 
 	playground/main.cpp
 	playground/cube.cpp
+	playground/camera.cpp
+	playground/controls.cpp
 	playground/SimpleFragmentShader.fragmentshader
 	playground/SimpleVertexShader.vertexshader
 	common/shader.cpp
