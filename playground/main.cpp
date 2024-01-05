@@ -10,7 +10,11 @@
 #include "shader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    
 int main() {
+
+    
     // Initialize GLFW and create a window
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -21,7 +25,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // For macOS
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(1920, 1080, "Rubik's Cube", nullptr, nullptr);
     if (window == nullptr) {
@@ -29,6 +33,25 @@ int main() {
         glfwTerminate();
         return -1;
     }
+
+    
+
+
+    // Instantiate Camera object and set it as the user pointer for GLFW
+    Camera camera(glm::vec3(0, 0, 10), glm::vec3(0, 1, 0), -90.0f, 0.0f, glm::vec3(0.0f, 0.0f, 0.0f), 10.0f);  
+    // Set the user pointer for the window to the camera
+
+    // Retrieve initial window size
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height); // Add this line to get the current window size
+
+    // Update the camera with the initial projection matrix based on the window size
+    camera.updateProjectionMatrix(45.0f, static_cast<float>(width), static_cast<float>(height), 0.1f, 100.0f);
+
+    glfwSetWindowUserPointer(window, &camera);
+
+    // After creating the window
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -48,16 +71,6 @@ int main() {
     glDepthFunc(GL_LESS); // Specify the depth test to use
     glDisable(GL_BLEND);
 
-    // Instantiate Camera object
-    Camera camera(glm::vec3(4, 4, 4), glm::vec3(0, 1, 0), -135.0f, -45.0f);
-
-   /* // Define the view matrix to position and orient the camera
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(4, 3, 3), // Camera is here in world space
-        glm::vec3(0, 0, 0), // and looks here: at the origin
-        glm::vec3(0, 1, 0)  // Head is up
-    ); */
-
     // Define the projection matrix for a perspective view
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
@@ -70,7 +83,6 @@ int main() {
     glfwSetKeyCallback(window, Controls::keyCallback);
     glfwSetMouseButtonCallback(window, Controls::mouseButtonCallback);
     glfwSetCursorPosCallback(window, Controls::cursorPositionCallback);
-    glfwSetScrollCallback(window, Controls::scrollCallback);
     // Build and compile our shader program (from shader.hpp)
     // Load shaders and create a shader program
     GLuint shaderProgram = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
@@ -89,6 +101,12 @@ int main() {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        controls.setDeltaTime(deltaTime);
+
+        // Update controls
+        controls.update(deltaTime);
+
         // Clear the color and depth buffers
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -100,16 +118,15 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
 
         GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
-        GLuint projLoc = glGetUniformLocation(shaderProgram, "projection");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        glm::mat4 projection = camera.getProjectionMatrix();
+        GLuint projLoc = glGetUniformLocation(shaderProgram, "projection");
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         for (const Cubie& cubie : rubiksCubeCubies) {
             drawCubie(shaderProgram, cubie);
         }
-
-        // Update controls
-        controls.update(deltaTime);
         
         // Swap the screen buffers
         glfwSwapBuffers(window);
@@ -126,4 +143,13 @@ int main() {
     glfwTerminate();
 
     return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    if (width == 0 || height == 0) return; // Skip processing if size is 0
+    glViewport(0, 0, width, height);
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    if (camera != nullptr) {
+        camera->updateProjectionMatrix(glm::radians(45.0f), width, height, 0.1f, 100.0f);
+    }
 }

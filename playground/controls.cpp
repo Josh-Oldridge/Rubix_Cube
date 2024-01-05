@@ -8,7 +8,6 @@ Controls::Controls(GLFWwindow* window, Camera* camera)
     glfwSetKeyCallback(window, Controls::keyCallback);
     glfwSetMouseButtonCallback(window, Controls::mouseButtonCallback);
     glfwSetCursorPosCallback(window, Controls::cursorPositionCallback);
-    glfwSetScrollCallback(window, Controls::scrollCallback);
 
     // Get the cursor position
     glfwGetCursorPos(window, &lastX, &lastY);
@@ -16,25 +15,9 @@ Controls::Controls(GLFWwindow* window, Camera* camera)
 
 // Callback to handle key press events
 void Controls::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Controls* controls = static_cast<Controls*>(glfwGetWindowUserPointer(window));
-
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        switch (key) {
-            case GLFW_KEY_W:
-                controls->camera->processKeyboard(FORWARD, controls->deltaTime);
-                break;
-            case GLFW_KEY_S:
-                controls->camera->processKeyboard(BACKWARD, controls->deltaTime);
-                break;
-            case GLFW_KEY_A:
-                controls->camera->processKeyboard(LEFT, controls->deltaTime);
-                break;
-            case GLFW_KEY_D:
-                controls->camera->processKeyboard(RIGHT, controls->deltaTime);
-                break;
-            // Add more key cases as needed
-        }
-    }
+    // One-time actions based on a key press can be handled here
+    // Example: toggling a setting, resetting a view, etc.
+    // If you do not yet have any one-time actions, this can be left as an empty function
 }
 
 // Callback to handle mouse button events
@@ -56,7 +39,7 @@ void Controls::cursorPositionCallback(GLFWwindow* window, double xpos, double yp
     
     if (controls->rightButtonPressed) {
         float xoffset = xpos - controls->lastX;
-        float yoffset = controls->lastY - ypos; // Reversed since y-coordinates go from bottom to top
+        float yoffset = ypos - controls->lastY; // Reversed since y-coordinates go from bottom to top
 
         // Process the camera's mouse movement
         controls->camera->processMouseMovement(xoffset, yoffset);
@@ -64,12 +47,6 @@ void Controls::cursorPositionCallback(GLFWwindow* window, double xpos, double yp
 
     controls->lastX = xpos;
     controls->lastY = ypos;
-}
-
-// Callback to handle the scroll events
-void Controls::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    Controls* controls = static_cast<Controls*>(glfwGetWindowUserPointer(window));
-    controls->camera->processMouseScroll(yoffset);
 }
 
 void Controls::update(float deltaTime) {
@@ -85,4 +62,8 @@ void Controls::update(float deltaTime) {
 
     // Optionally, you could handle other continuous inputs here,
     // such as mouse dragging for looking around
+}
+
+void Controls::setDeltaTime(float dt) {
+    deltaTime = dt;
 }

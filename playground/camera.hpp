@@ -2,6 +2,7 @@
 #define CAMERA_HPP
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 enum Camera_Movement {
     FORWARD,
@@ -12,14 +13,14 @@ enum Camera_Movement {
 
 class Camera {
 public:
-    Camera(const glm::vec3& position, const glm::vec3& up, float yaw, float pitch);
+    Camera(const glm::vec3& position, const glm::vec3& up, float yaw, float pitch,
+           const glm::vec3& cubeCenterParam, float radiusParam);
 
     glm::mat4 GetViewMatrix() const;
     void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
-    void processMouseScroll(float yoffset);
     void processKeyboard(Camera_Movement direction, float deltaTime);
-
-    // TODO: Add other necessary methods and member variables
+    void updateProjectionMatrix(float fov, float width, float height, float nearPlane, float farPlane);
+    glm::mat4 getProjectionMatrix() const;
 
 private:
     glm::vec3 Position;
@@ -27,10 +28,13 @@ private:
     glm::vec3 Up;
     glm::vec3 Right;
     glm::vec3 WorldUp;
+    glm::vec3 cubeCenter;
+    glm::mat4 projectionMatrix; // Store the projection matrix here
     
     // Euler Angles
     float Yaw;
     float Pitch;
+    float radius; 
     
     // Camera options
     float MovementSpeed;

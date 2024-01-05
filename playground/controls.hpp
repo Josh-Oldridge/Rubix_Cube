@@ -14,7 +14,7 @@ public:
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos);
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    void setDeltaTime(float dt);
 
 
 private:

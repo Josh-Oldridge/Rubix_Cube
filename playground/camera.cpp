@@ -1,11 +1,13 @@
 #include "Camera.hpp"
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
-Camera::Camera(const glm::vec3& position, const glm::vec3& up, float yaw, float pitch)
+Camera::Camera(const glm::vec3& position, const glm::vec3& up, float yaw, float pitch,
+           const glm::vec3& cubeCenterParam, float radiusParam)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
       MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY),
@@ -13,7 +15,9 @@ Camera::Camera(const glm::vec3& position, const glm::vec3& up, float yaw, float 
       Position(position),
       WorldUp(up),
       Yaw(yaw),
-      Pitch(pitch) {
+      Pitch(pitch),
+      cubeCenter(cubeCenterParam), // Initialize with default value
+      radius(radiusParam) {
     updateCameraVectors();
 }
 
@@ -37,32 +41,66 @@ void Camera::processMouseMovement(float xoffset, float yoffset, bool constrainPi
 }
 
 void Camera::updateCameraVectors() {
-    // Calculate the new front vector
-    glm::vec3 front;
-    front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    front.y = sin(glm::radians(Pitch));
-    front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Front = glm::normalize(front);
-    // Also re-calculate the right and up vector
-    Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    Up = glm::normalize(glm::cross(Right, Front));
+    // Calculate the camera's position using spherical coordinates
+    glm::vec3 newPosition;
+    newPosition.x = cubeCenter.x + radius * cos(glm::radians(Pitch)) * sin(glm::radians(Yaw));
+    newPosition.y = cubeCenter.y + radius * sin(glm::radians(Pitch));
+    newPosition.z = cubeCenter.z + radius * cos(glm::radians(Pitch)) * cos(glm::radians(Yaw));
+
+    // Update the camera's position
+    Position = newPosition;
+
+    // Calculate the new Front vector as pointing from the camera to the cube center
+    Front = glm::normalize(cubeCenter - Position);
+
+    // Conditionally determine the Up vector based on the inverted camera angle
+    if (Pitch > 89.0f || Pitch < -89.0f) {
+        // If we have flipped over the top or bottom, the Up vector should be inverted
+        Up = glm::vec3(0.0f, -1.0f, 0.0f);
+    } else {
+        Up = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    // Recalculate Right vector
+    Right = glm::normalize(glm::cross(Front, Up));
 }
 
-void Camera::processMouseScroll(float yoffset) {
-    Zoom -= yoffset * MouseSensitivity; // You can define a dedicated sensitivity for scroll, if needed.
-    if (Zoom < 1.0f) Zoom = 1.0f;
-    if (Zoom > 45.0f) Zoom = 45.0f;
-}
 
+// Camera class method to handle keyboard input for rotation
 void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
-    float velocity = MovementSpeed * deltaTime;
+    // Increase this value for faster rotation (degrees per second)
+    float rotationSpeed = 360.0f; // You can adjust this value as needed
+    float angleChange = rotationSpeed * deltaTime;
 
+    // Now apply this updated angle change based on deltaTime and direction
     if (direction == FORWARD)
-        Position += Front * velocity;
-    if (direction == BACKWARD)
-        Position -= Front * velocity;
-    if (direction == LEFT)
-        Position -= Right * velocity;
-    if (direction == RIGHT)
-        Position += Right * velocity;
+        Pitch -= angleChange; // Example: look up
+    else if (direction == BACKWARD)
+        Pitch += angleChange; // Example: look down
+    else if (direction == LEFT)
+        Yaw -= angleChange; // Example: rotate left
+    else if (direction == RIGHT)
+        Yaw += angleChange; // Example: rotate right
+
+    // Ensure Yaw wraps around at 360 degrees
+    if (Yaw > 360.0f)
+        Yaw -= 360.0f;
+    else if (Yaw < 0.0f)
+        Yaw += 360.0f;
+
+    // Ensure Pitch is clamped to prevent flipping
+    if (Pitch > 89.0f)
+        Pitch = 89.0f;
+    else if (Pitch < -89.0f)
+        Pitch = -89.0f;
+
+    updateCameraVectors(); // Update the camera's direction vectors based on the new yaw and pitch
+}
+// Implement the Camera::updateProjectionMatrix method, presumably inside Camera.cpp
+void Camera::updateProjectionMatrix(float fov, float width, float height, float nearPlane, float farPlane) {
+    projectionMatrix = glm::perspective(glm::radians(fov), width / height, nearPlane, farPlane);
+}
+
+glm::mat4 Camera::getProjectionMatrix() const {
+    return projectionMatrix;
 }
