@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
 
 // Define the vertex array object, vertex buffer object, and element buffer object as global in the cube.cpp scope
 GLuint VAO, VBO, EBO;
@@ -28,6 +30,23 @@ GLuint cubeIndices[] = {
     3, 2, 6, 6, 7, 3
 };
 
+
+// This function generates a 3D array of Cubies with their world positions
+std::vector<Cubie> generateCubies() {
+    std::vector<Cubie> cubies;
+    float offset = 1.0f; // Adjust as needed for distance between cubies
+
+    for (int x = 0; x < 3; ++x) {
+        for (int y = 0; y < 3; ++y) {
+            for (int z = 0; z < 3; ++z) {
+                glm::vec3 pos(offset * (x - 1), offset * (y - 1), offset * (z - 1));
+                cubies.push_back(Cubie{pos});
+            }
+        }
+    }
+    return cubies;
+}
+
 void setupCube() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -51,37 +70,20 @@ void setupCube() {
     glBindVertexArray(0);
 }
 
-void drawCube(GLuint shaderProgram) {
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+void drawCube(GLuint shaderProgram, Cubie cubie) {
+    // Calculate model matrix for this cubie
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), cubie.position);
 
-    glm::mat4 model = glm::mat4(1.0f);  // Initialize to identity matrix for model matrix
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(4,3,-3), // Camera is at (4,3,3), in World Space
-        glm::vec3(0,0,0),  // and looks at the origin
-        glm::vec3(0,1,0)   // Head is up (set to 0,-1,0 to look upside-down)
-    );
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) 4 / (float) 3, 0.1f, 100.0f);
-
-    // Get the uniform locations
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
-    GLuint viewLoc  = glGetUniformLocation(shaderProgram, "view");
-    GLuint projLoc  = glGetUniformLocation(shaderProgram, "projection");
-
-    // Pass the matrices to the shader
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    
-    // Draw the cube
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
 
+    glBindVertexArray(VAO); // Bind the VAO
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0); // Unbind the VAO
+}
 void cleanupCube() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    glBindVertexArray(0);
 }
