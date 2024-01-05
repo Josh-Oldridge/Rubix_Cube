@@ -58,11 +58,8 @@ int main() {
     // Load shaders and create a shader program
     GLuint shaderProgram = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 
-    // Setup the cube
-    setupCube();
-
-    // Generate the cubies for the Rubik's cube
-    std::vector<Cubie> rubiksCubeCubies = generateCubies();
+    // Generate cubies for the Rubik's cube and setup their VAOs and VBOs
+    std::vector<Cubie> rubiksCubeCubies = generateRubiksCubeCubies();
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -80,7 +77,7 @@ int main() {
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         for (const Cubie& cubie : rubiksCubeCubies) {
-            drawCube(shaderProgram, cubie);
+            drawCubie(shaderProgram, cubie);
         }
         
         // Swap the screen buffers
@@ -89,12 +86,11 @@ int main() {
         glfwPollEvents();
     }
 
-    glDeleteProgram(shaderProgram);  // Delete the shader program when done
+    // Cleanup
+    cleanupCubies(rubiksCubeCubies);  // Call the new cleanup function
+    glDeleteProgram(shaderProgram);    // Delete the shader program
 
-    // Properly de-allocate all resources once they've outlived their purpose
-    cleanupCube();
-
-    // Terminate GLFW, clearing any resources allocated by GLFW.
+    // Terminate GLFW to clear any allocated resources
     glfwTerminate();
 
     return 0;
