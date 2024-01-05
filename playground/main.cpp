@@ -43,9 +43,11 @@ int main() {
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS); // Specify the depth test to use
+    glDisable(GL_BLEND);
 
     // Define the view matrix to position and orient the camera
-        glm::mat4 view = glm::lookAt(
+    glm::mat4 view = glm::lookAt(
         glm::vec3(4, 3, 3), // Camera is here in world space
         glm::vec3(0, 0, 0), // and looks here: at the origin
         glm::vec3(0, 1, 0)  // Head is up

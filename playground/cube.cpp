@@ -11,7 +11,7 @@ GLuint VAO, VBO, EBO;
 std::vector<Vertex> createCubieVertices(const glm::vec3 (&colors)[6]) {
     // Create an empty vector with space for 24 vertices (4 vertices for each of the 6 cube faces)
     std::vector<Vertex> vertices;
-    vertices.reserve(24);
+    vertices.reserve(36);
 
     // Vertex positions for a standard unit cube with side length 1
     // These positions assume the cube is centered at the origin
@@ -26,23 +26,31 @@ std::vector<Vertex> createCubieVertices(const glm::vec3 (&colors)[6]) {
         {-0.5f,  0.5f,  0.5f}, // Front-top-left
     };
 
-    // Each entry in the index array refers to a vertex in 'vertexPositions'
     const GLuint faceIndices[6][4] = {
-        {4, 5, 6, 7}, // Front face
-        {1, 0, 3, 2}, // Back face
-        {0, 4, 7, 3}, // Left face
-        {5, 1, 2, 6}, // Right face
-        {3, 7, 6, 2}, // Top face
-        {0, 1, 5, 4}, // Bottom face
+        // Front face (when looking from the 0.5f on the z-axis towards the origin)
+        {4, 7, 6, 5},
+        // Back face (when looking from the -0.5f on the z-axis towards the origin)
+        {0, 3, 2, 1},
+        // Left face (when looking from the -0.5f on the x-axis towards the origin)
+        {4, 0, 3, 7},
+        // Right face (when looking from the 0.5f on the x-axis towards the origin)
+        {1, 5, 6, 2},
+        // Top face (when looking from the 0.5f on the y-axis towards the origin)
+        {7, 3, 2, 6},
+        // Bottom face (when looking from the -0.5f on the y-axis towards the origin)
+        {0, 4, 5, 1},
     };
     
-    // Generate vertices for each face using the positions and colors
     for (int face = 0; face < 6; face++) {
-        for (int i = 0; i < 4; i++) {
-            GLuint index = faceIndices[face][i];
-            const GLfloat* position = vertexPositions[index];
-            vertices.push_back({{position[0], position[1], position[2]}, {colors[face].x, colors[face].y, colors[face].z}});
-        }
+        // Triangle 1
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][0]][0], vertexPositions[faceIndices[face][0]][1], vertexPositions[faceIndices[face][0]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][1]][0], vertexPositions[faceIndices[face][1]][1], vertexPositions[faceIndices[face][1]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][2]][0], vertexPositions[faceIndices[face][2]][1], vertexPositions[faceIndices[face][2]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
+
+        // Triangle 2
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][2]][0], vertexPositions[faceIndices[face][2]][1], vertexPositions[faceIndices[face][2]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][3]][0], vertexPositions[faceIndices[face][3]][1], vertexPositions[faceIndices[face][3]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
+        vertices.push_back(Vertex{{vertexPositions[faceIndices[face][0]][0], vertexPositions[faceIndices[face][0]][1], vertexPositions[faceIndices[face][0]][2]}, {colors[face].x, colors[face].y, colors[face].z}});
     }
 
     return vertices;
