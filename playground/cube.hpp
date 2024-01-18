@@ -14,8 +14,8 @@ struct Vertex {
 struct Cubie {
     glm::vec3 position;
     std::vector<Vertex> vertices;
-    GLuint VAO; // Add this
-    GLuint VBO; // Add this
+    GLuint VAO;
+    GLuint VBO;
 };
 
 void setupCubieBuffers(Cubie& cubie);
@@ -23,6 +23,5 @@ void drawCubie(GLuint shaderProgram, const Cubie& cubie);
 std::vector<Cubie> generateRubiksCubeCubies(); 
 std::vector<Vertex> createCubieVertices(const glm::vec3 (&colors)[6]);
 void cleanupCubies(std::vector<Cubie>& rubiksCubeCubies);
-
 
 #endif // CUBE_HPP

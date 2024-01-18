@@ -29,14 +29,12 @@ private:
     glm::vec3 Right;
     glm::vec3 WorldUp;
     glm::vec3 cubeCenter;
-    glm::mat4 projectionMatrix; // Store the projection matrix here
+    glm::mat4 projectionMatrix;
     
-    // Euler Angles
     float Yaw;
     float Pitch;
     float radius; 
     
-    // Camera options
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;

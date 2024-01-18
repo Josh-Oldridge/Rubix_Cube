@@ -21,7 +21,6 @@ private:
     GLFWwindow* window;
     Camera* camera;
 
-    // Mouse state
     bool rightButtonPressed;
     double lastX, lastY;
     float deltaTime;
