@@ -60,6 +60,7 @@ add_executable(playground
 	playground/cube.cpp
 	playground/camera.cpp
 	playground/controls.cpp
+	playground/rubiksCube.cpp
 	playground/SimpleFragmentShader.fragmentshader
 	playground/SimpleVertexShader.vertexshader
 	common/shader.cpp
