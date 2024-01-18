@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <iostream>
 
 struct Vertex {
     GLfloat position[3];

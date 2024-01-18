@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glew.h>
@@ -7,11 +8,13 @@
 #include "cube.hpp"
 #include "camera.hpp"
 #include "controls.hpp"
+#include "rubiksCube.hpp"
 #include "shader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-    
+
+
 int main() {
 
     
@@ -94,6 +97,8 @@ int main() {
     float lastFrame = 0.0f;
     float deltaTime = 0.0f;
 
+    
+
     // Main loop
     while (!glfwWindowShouldClose(window)) {
 
@@ -153,3 +158,4 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         camera->updateProjectionMatrix(glm::radians(45.0f), width, height, 0.1f, 100.0f);
     }
 }
+
